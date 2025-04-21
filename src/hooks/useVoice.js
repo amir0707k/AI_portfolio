@@ -3,15 +3,17 @@ import { useVoiceStatus } from "../context/VoiceContext";
 import { speak } from "../utils/speech";
 import { getAIResponse } from "../utils/aiResponder";
 
-const handlePrompt = (text) => {
-  // basic command matching (can upgrade later)
-  const response = getAIResponse(text); // custom function (we'll create next)
+// const handlePrompt = (text) => {
+//   // basic command matching (can upgrade later)
+//   const response = getAIResponse(text).then(() => {
+//     setStatus("speaking");
+//     speak(response, () => {
+//       setStatus("listening");
+//     });
+//   }); // custom function (we'll create next)
 
-  setStatus("speaking");
-  speak(response, () => {
-    setStatus("listening");
-  });
-};
+//   console.log(response);
+// };
 
 const useVoice = (onPromptCaptured) => {
   const recognitionRef = useRef(null);
@@ -19,6 +21,14 @@ const useVoice = (onPromptCaptured) => {
   const restartTimeout = useRef(null);
   const [transcript, setTranscript] = useState("");
   const { setStatus } = useVoiceStatus();
+  const [aiResult, setAiResult] = useState("");
+
+  useEffect(() => {
+    setStatus("speaking");
+    speak(aiResult, () => {
+      setStatus("listening");
+    });
+  }, [aiResult]);
 
   useEffect(() => {
     const SpeechRecognition =
@@ -93,7 +103,7 @@ const useVoice = (onPromptCaptured) => {
       //     //   }
       //   };
 
-      recognition.onresult = (event) => {
+      recognition.onresult = async (event) => {
         const result = event.results[event.results.length - 1];
         if (result.isFinal) {
           const spokenText = result[0].transcript.trim();
@@ -101,16 +111,17 @@ const useVoice = (onPromptCaptured) => {
           setTranscript(spokenText);
           setStatus("thinking");
 
-          const response = getAIResponse(spokenText);
+          const response = await getAIResponse(spokenText);
+          setAiResult(response); 
 
           onPromptCaptured(spokenText);
 
-          setTimeout(() => {
-            setStatus("speaking");
-            speak(response, () => {
-              setStatus("listening");
-            });
-          }, 500);
+          // if(aiResult){
+          //   setStatus("speaking");
+          //   speak(response, () => {
+          //     setStatus("listening");
+          //   });
+          // }
         }
       };
 

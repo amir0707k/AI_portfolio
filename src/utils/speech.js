@@ -1,4 +1,4 @@
-export const speak = (text, onEnd = () => {}) => {
+export const speak = async (text, onEnd = () => {}) => {
     if (!window.speechSynthesis) {
       console.error("Speech synthesis not supported.");
       return;
@@ -9,9 +9,9 @@ export const speak = (text, onEnd = () => {}) => {
     utterance.pitch = 1;
     utterance.rate = 1;
     utterance.volume = 1;
-  
+    
     utterance.onstart = () => {
-      console.log("🗣️ Speaking:", text);
+    //   console.log("🗣️ Speaking:", text);
     };
   
     utterance.onend = () => {
